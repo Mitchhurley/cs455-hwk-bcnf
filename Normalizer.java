@@ -1,3 +1,5 @@
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -56,12 +58,58 @@ public class Normalizer {
    * @return a set of super keys
    */
   public static Set<Set<String>> findSuperkeys(Set<String> rel, FDSet fdset) {
-    // TODO - sanity check: are all the attributes in the FD set even in the
+    // sanity check: are all the attributes in the FD set even in the
     // relation? Throw an IllegalArgumentException if not.
+	  Set<String> allAtts = new HashSet<String>();
+	  for (FD fd: fdset) {
+		  allAtts.addAll(fd.getLeft());
+		  allAtts.addAll(fd.getRight());
+	  }
+	  for (String att: allAtts) {
+		  if (!rel.contains(att)) {
+			  //TODO Make error message make sense 
+			  throw new IllegalArgumentException();
+		  }
+	  }
+	  //Get all subsets of attributes
+	  Set<Set<String>> subs = new HashSet<Set<String>>(FDUtil.powerSet(rel));
+	  
+	 
+	  Set<Set<String>> superkeys = new HashSet<Set<String>>();
+	  for (Set<String> subset: subs) {
+		  if (calcAttributeClosure(subset, fdset,rel)) {
+			  superkeys.add(subset);
+		  }
+	  }
+    return superkeys;
+  }
+  /**This method determines whether or not a set of attributes can be a superkey by calculating the 
+   * closure and comparing it to the full list of attributes
+   * 
+   * @param attsToTest	A set of attributes to find the closure of
+   * @param fdset		The set of FDs to determine attribute closure
+   * @param rel			The set of all atributes in the relation
+   * @return
+   */
+  
+  public static boolean calcAttributeClosure(Set<String> attsToTest, FDSet fdset, Set<String> rel) {
+	  Set<String> closure = new HashSet<>(attsToTest);
+	  boolean changed = true;
+	  while (changed) {
+		  //get number of attributes pre iteration for comparison
+		  int numAtts = closure.size();
+		  //iterate through given FDs
+		  for (FD fd: fdset) {
 
-    // TODO - iterate through each subset of the relation's attributes, and test
-    // the attribute closure of each subset
-    return null;
+			  if (closure.containsAll(fd.getLeft())) {
+				  closure.addAll(fd.getRight());
+			  }
+		  }
+		  if (closure.size() == numAtts) {
+			  changed = false;
+		  }
+	  }
+	  return (closure.equals(rel));
   }
 
 }

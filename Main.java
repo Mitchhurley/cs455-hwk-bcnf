@@ -7,6 +7,7 @@ public class Main {
      */
 
     // U(A,B,C,D,E)
+	  /*
     Set<String> U = new HashSet<>(Arrays.asList("A", "B", "C", "D", "E"));
     FD f1 = new FD(Arrays.asList("A", "E"), Arrays.asList("D")); // AE --> D
     FD f2 = new FD(Arrays.asList("A", "B"), Arrays.asList("C")); // AB --> C
@@ -21,6 +22,12 @@ public class Main {
     FD g3 = new FD(Arrays.asList("A"), Arrays.asList("B")); // A --> B
     FD g4 = new FD(Arrays.asList("A", "B"), Arrays.asList("C")); // AB --> C
     FDSet fdsetR = new FDSet(g1, g2, g3, g4);
-    System.out.println("Final BCNF Schemas: " + Normalizer.BCNFDecompose(R, fdsetR));
+    System.out.println("Final BCNF Schemas: " + Normalizer.BCNFDecompose(R, fdsetR));*/
+	  FD f1 = new FD(Arrays.asList("ssn"), Arrays.asList("name")); // ssn --> name
+	  FD f2 = new FD(Arrays.asList("ssn"), Arrays.asList("eyecolor")); // ssn --> eyecolor
+	  FDSet fdset = new FDSet(f1, f2);
+
+	  Set<String> people = new HashSet<>(Arrays.asList("ssn", "name")); // Relation people(ssn, name)
+	  System.out.println("Superkeys: " + Normalizer.findSuperkeys(people, fdset));
   }
 }
