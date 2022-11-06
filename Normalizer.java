@@ -67,8 +67,9 @@ public class Normalizer {
 	  }
 	  for (String att: allAtts) {
 		  if (!rel.contains(att)) {
-			  //TODO Make error message make sense 
-			  throw new IllegalArgumentException();
+			  throw new IllegalArgumentException("FD refers to unknown attributes: " + rel.toString() + " --> " +
+				"["+ att + "]"	  );
+			  
 		  }
 	  }
 	  //Get all subsets of attributes
@@ -89,7 +90,7 @@ public class Normalizer {
    * @param attsToTest	A set of attributes to find the closure of
    * @param fdset		The set of FDs to determine attribute closure
    * @param rel			The set of all atributes in the relation
-   * @return
+   * @return			true if the attribute closure has all the attributes
    */
   
   public static boolean calcAttributeClosure(Set<String> attsToTest, FDSet fdset, Set<String> rel) {
