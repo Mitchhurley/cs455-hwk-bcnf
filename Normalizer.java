@@ -20,13 +20,13 @@ public class Normalizer {
   public static Set<Set<String>> BCNFDecompose(Set<String> rel, FDSet fdset) {
     // TODO - First test if the given relation is already in BCNF with respect to
     // the provided FD set.
-	  System.out.println("BCNF Start");
 	  Set<Set<String>> superkeys = new HashSet<Set<String>>(findSuperkeys(rel, fdset));
 	  if (isBCNF(rel, fdset)) {
 		  Set<Set<String>> inBCNF = new HashSet<Set<String>>();
 		  inBCNF.add(rel);
 		  return inBCNF;
 	  }
+	  System.out.println("BCNF Start");
 	  System.out.println("Current schema = " + rel.toString());
 	  System.out.println("Current superkeys = " + superkeys.toString());
 	  FD violator = findViolation(superkeys, fdset );
@@ -37,9 +37,25 @@ public class Normalizer {
 	  Set<String> right = new HashSet<>(rel);
 	  right.removeAll(violator.getRight());
 	  right.addAll(violator.getLeft());
+	  
+	  FDSet leftFDs = new FDSet();
+	  FDSet rightFDs = new FDSet();
+	 
+	  FDSet closure = new FDSet(FDUtil.fdSetClosure(new FDSet(fdset)));
+	  for (FD fd: closure) {
+		  Set<String> atts = new HashSet<>(fd.getLeft());
+		  atts.addAll(fd.getRight());
+		  if (left.containsAll(atts)) {
+			  leftFDs.add(fd);
+		  }if (right.containsAll(atts)) {
+			  rightFDs.add(fd);
+		  }
+	  }
 	  System.out.println("Left Schema: "+ left.toString());
-
+	  System.out.println("Left Schema's superkeys = " + findSuperkeys(left, leftFDs));
 	  System.out.println("Right Schema: "+ right.toString());
+	  System.out.println("Right Schema's superkeys = " + findSuperkeys(right, rightFDs));
+	  
     // TODO - Identify a nontrivial FD that violates BCNF. Split the relation's
     // attributes using that FD, as seen in class.
 
@@ -51,9 +67,11 @@ public class Normalizer {
     // R_Right) relation. If so, then the FD gets added to the R_Left's (or R_Right's) FD
     // set. If the union is not a subset of either new relation, then the FD is
     // discarded
-
-    // Repeat the above until all relations are in BCNF
-    return null;
+	  Set<Set<String>> schema = new HashSet<Set<String>>();
+	  schema.addAll(BCNFDecompose(left, leftFDs));
+	  schema.addAll(BCNFDecompose(right, rightFDs));
+	  System.out.println("BCNF End");
+    return schema;
   }
 
   /**
@@ -116,7 +134,7 @@ public class Normalizer {
    * @param attsToTest	A set of attributes to find the closure of
    * @param fdset		The set of FDs to determine attribute closure
    * @param rel			The set of all atributes in the relation
-   * @return			true if the attribute closure has all the attributes
+   * @return			set of attribute closure
    */
   
   public static Set<String> calcAttributeClosure(Set<String> attsToTest, FDSet fdset, Set<String> rel) {
@@ -140,7 +158,12 @@ public class Normalizer {
   }
   
   
-  
+  /**Method that finds the functional dependency that prevents the relation from being in bcnf
+   * 
+   * @param superkeys	the superkeys of the set
+   * @param fdset		the set of FDs to test
+   * @return 			the FD that violates BCNF
+   */
   public static FD findViolation(Set<Set<String>> superkeys, FDSet fdset) {
 	  for (FD fd:fdset) {
 	    	if (!fd.isTrivial()) {
