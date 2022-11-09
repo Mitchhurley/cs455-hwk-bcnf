@@ -9,7 +9,6 @@ import java.util.Set;
  * @version <DATE>
  */
 public class Normalizer {
-
   /**
    * Performs BCNF decomposition
    * 
@@ -18,7 +17,7 @@ public class Normalizer {
    * @return a set of relations (as attribute sets) that are in BCNF
    */
   public static Set<Set<String>> BCNFDecompose(Set<String> rel, FDSet fdset) {
-    // TODO - First test if the given relation is already in BCNF with respect to
+    //First test if the given relation is already in BCNF with respect to
     // the provided FD set.
 	  Set<Set<String>> superkeys = new HashSet<Set<String>>(findSuperkeys(rel, fdset));
 	  if (isBCNF(rel, fdset)) {
@@ -26,18 +25,19 @@ public class Normalizer {
 		  inBCNF.add(rel);
 		  return inBCNF;
 	  }
+	  //If not find Violationg FD
 	  System.out.println("BCNF Start");
 	  System.out.println("Current schema = " + rel.toString());
 	  System.out.println("Current superkeys = " + superkeys.toString());
 	  FD violator = findViolation(superkeys, fdset );
 	  System.out.println("*** Splitting on " + violator.toString() + " ***");
-	  
+	  //Split based on violating FD
 	  Set<String> left = new HashSet<>(violator.getLeft());
 	  left.addAll(violator.getRight());
 	  Set<String> right = new HashSet<>(rel);
 	  right.removeAll(violator.getRight());
 	  right.addAll(violator.getLeft());
-	  
+	  //assign all fds to either left or right
 	  FDSet leftFDs = new FDSet();
 	  FDSet rightFDs = new FDSet();
 	 
@@ -47,7 +47,7 @@ public class Normalizer {
 		  atts.addAll(fd.getRight());
 		  if (left.containsAll(atts)) {
 			  leftFDs.add(fd);
-		  }if (right.containsAll(atts)) {
+		  }else if (right.containsAll(atts)) {
 			  rightFDs.add(fd);
 		  }
 	  }
@@ -55,18 +55,7 @@ public class Normalizer {
 	  System.out.println("Left Schema's superkeys = " + findSuperkeys(left, leftFDs));
 	  System.out.println("Right Schema: "+ right.toString());
 	  System.out.println("Right Schema's superkeys = " + findSuperkeys(right, rightFDs));
-	  
-    // TODO - Identify a nontrivial FD that violates BCNF. Split the relation's
-    // attributes using that FD, as seen in class.
-
-    // TODO - Redistribute the FDs in the closure of fdset to the two new
-    // relations (R_Left and R_Right) as follows:
-    //
-    // Iterate through closure of the given set of FDs, then union all attributes
-    // appearing in the FD, and test if the union is a subset of the R_Left (or
-    // R_Right) relation. If so, then the FD gets added to the R_Left's (or R_Right's) FD
-    // set. If the union is not a subset of either new relation, then the FD is
-    // discarded
+	  //Recurse on left and right
 	  Set<Set<String>> schema = new HashSet<Set<String>>();
 	  schema.addAll(BCNFDecompose(left, leftFDs));
 	  schema.addAll(BCNFDecompose(right, rightFDs));
